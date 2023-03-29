@@ -1,35 +1,17 @@
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import CommandStart, Text
-from aiogram.types import (KeyboardButton, Message, ReplyKeyboardMarkup,
-                           ReplyKeyboardRemove)
+from aiogram.filters import CommandStart
 from config import TOKEN
-from buttons import keyboard_main_buttons, keyboard_admins, keyboard1, markup1, keyboard2, markup2
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, KeyboardButtonPollType
-from aiogram.types.web_app_info import WebAppInfo
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-import asyncio
-import sqlite3
-from aiogram import types
+from buttons import keyboard_main_buttons, markup1, markup2
 import random
 import string
-from aiogram import Bot, Dispatcher, types
-from aiogram import Bot, types
-from aiogram.utils import deep_linking
-from aiogram.types import ParseMode
 from random import randint
-
 from aiogram import Bot, Dispatcher
-from aiogram.filters import Command, Text
-from aiogram.types import (CallbackQuery, InlineKeyboardButton,
-                           InlineKeyboardMarkup, Message)
+from aiogram.filters import Text
+from aiogram.types import (CallbackQuery, Message)
 from buttons import balance_work, add_balance_buttons, max, accept, another_type_to_add_balance, back, keyboard_admin_buttons, keyboard_start, keyboard_work_with_balances, take_money_back_buttons, keyboard_adminwork_take_money, keyboard_choose_type_to_update_balances, my_invest_buttons, invest_from, take_invest_to, calculator_keyboard, support, go_to_info, start
-import asyncio
-from datetime import time, datetime
+from datetime import datetime
 import asyncio
 import datetime
 import sqlite3
-
-from aiogram.types import ChatMember, ChatMemberUpdated
 
 
 # Connect to bot in TG
