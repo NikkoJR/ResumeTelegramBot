@@ -4,10 +4,11 @@ from buttons import keyboard_main_buttons, markup1, markup2
 import random
 import string
 from random import randint
+
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Text
 from aiogram.types import (CallbackQuery, Message)
-from buttons import balance_work, add_balance_buttons, max, accept, another_type_to_add_balance, back, keyboard_admin_buttons, keyboard_start, keyboard_work_with_balances, take_money_back_buttons, keyboard_adminwork_take_money, keyboard_choose_type_to_update_balances, my_invest_buttons, invest_from, take_invest_to, calculator_keyboard, support, go_to_info, start
+from buttons import balance_work, add_balance_buttons, max, accept, another_type_to_add_balance, back, keyboard_admin_buttons, keyboard_start, keyboard_work_with_balances, take_money_back_buttons, keyboard_adminwork_take_money, keyboard_choose_type_to_update_balances, my_invest_buttons, invest_from, calculator_keyboard, support, go_to_info, start
 from datetime import datetime
 import asyncio
 import datetime
@@ -75,6 +76,10 @@ admin_allow: dict = {'password': ''}
 
 user_to_add_balance: dict = {'user_id': 0,
                             'money_to_add': 0}
+
+test: dict = {'wait_id': False,
+              'wait_sum': False,
+              'id': 0}
 
 listid = []
 
@@ -501,6 +506,7 @@ def add_procent(user_id, money):
 
 
 
+
         #
 #
 #
@@ -509,7 +515,7 @@ def add_procent(user_id, money):
 
 
 # total process
-print('Bot "import buttons" is ON')
+print('Bot is ON')
 
 
 #
@@ -524,24 +530,8 @@ us_id: dict = {'us_id': 0}
 
 @dp.message(CommandStart())
 async def start_process(message: Message):
-    await message.answer('👋*Приветсвуем!*\n\n💥*Следите за свежими новостями и бонусами в нашем новостном канале:*', reply_markup=start,  parse_mode='Markdown')
+    await message.answer('👋*Приветствуем!*\n\n💥*Следите за свежими новостями и бонусами в нашем новостном канале:*', reply_markup=start,  parse_mode='Markdown')
     us_id['us_id'] = message.from_user.id
-
-
-@dp.callback_query(Text(text='start'))
-async def add_money_to_invest(callback: CallbackQuery):
-    # Отвечаем на callback, чтобы убрать часики
-    await callback.message.delete()
-    # Отправляем в чат новое сообщение с шуткой
-    await callback.message.answer(text='👇 Нажмите start для начала работы.', reply_markup=keyboard_start)
-
-
-@dp.message(Text(text='start'))
-async def start_process(message: Message):
-    await message.answer(
-        "👋 Рады приветствовать!\n\n🔹Arbitrage Income - зарабатывает на P2P связках, где ты можешь открыть депозит и получать пассивный доход\n\n🚀 "
-        "Выберите нужный пункт меню:\n\nПоддержка: @Arbitrageincome_support", reply_markup=keyboard_main_buttons)
-
     user_id = message.from_user.id
     user_info['user_id'] = user_id
     referral_link = message.text.strip()
@@ -549,12 +539,8 @@ async def start_process(message: Message):
     user_name = message.from_user.username
     user_info['user_name'] = user_name
 
-
-
     cur.execute(f"INSERT INTO users (user_id) VALUES ({user_id})")
     bd.commit()
-
-
 
     # Work with money table
     result = check_tablemoney(user_id)
@@ -567,9 +553,6 @@ async def start_process(message: Message):
         bd.commit()
         print('money table was created')
 
-
-
-
     # Work with referals link
     cur.execute("SELECT * FROM referrals WHERE user_id=?", (user_id,))
     row = cur.fetchone()
@@ -577,7 +560,9 @@ async def start_process(message: Message):
     if row is None:
 
         ref_link = generate_ref_link()
-        cur.execute("INSERT INTO referrals (user_id, ref_link, user_name, invited_by, lvl_one, lvl_two, lvl_three, use_referal_id, adm_allow, deposit, accumulated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (user_id, ref_link, user_name, '', 0, 0, 0, 0, 0, 0, 0))
+        cur.execute(
+            "INSERT INTO referrals (user_id, ref_link, user_name, invited_by, lvl_one, lvl_two, lvl_three, use_referal_id, adm_allow, deposit, accumulated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, ref_link, user_name, '', 0, 0, 0, 0, 0, 0, 0))
         bd.commit()
 
     else:
@@ -586,12 +571,10 @@ async def start_process(message: Message):
     referal_link = f"https://t.me/ArbitrageIncome_bot?start={ref_link}"
     info_about_referals['referal_link'] = referal_link
 
-
     #
     #
     #
     #
-
 
     listd = referral_link.split(' ')
 
@@ -621,7 +604,6 @@ async def start_process(message: Message):
 
     #
 
-
     cur.execute("SELECT use_referal_id FROM referrals WHERE user_id=?", (user_id,))
     use_referal_id = cur.fetchone()
     use_referal_id = str(use_referal_id)
@@ -632,7 +614,6 @@ async def start_process(message: Message):
 
     use_referal_id = int(use_referal_id)
     print(use_referal_id)
-
 
     if referral_link != '' and use_referal_id == 0 and user_id != info_about_referals['id_link_owner']:
         # Отправляем уведомление владельцу ссылки
@@ -649,7 +630,24 @@ async def start_process(message: Message):
 
         print('-------------------')
 
-    else: await message.answer('❗ Повторный вход через реферальную ссылку или же вход через свою же реферальную ссылку запрещен ❗')
+    else:
+        await message.answer(
+            '❗ Повторный вход через реферальную ссылку или же вход через свою же реферальную ссылку запрещен ❗')
+
+
+@dp.callback_query(Text(text='start'))
+async def add_money_to_invest(callback: CallbackQuery):
+    # Отвечаем на callback, чтобы убрать часики
+    await callback.message.delete()
+    # Отправляем в чат новое сообщение с шуткой
+    await callback.message.answer(text='👇 Нажмите start для начала работы.', reply_markup=keyboard_start)
+
+
+@dp.message(Text(text='start'))
+async def start_process(message: Message):
+    await message.answer(
+        "👋 Рады приветствовать!\n\n🔹Arbitrage Income - зарабатывает на P2P связках, где ты можешь открыть депозит и получать пассивный доход\n\n🚀 "
+        "Выберите нужный пункт меню:\n\nПоддержка: @Arbitrageincome_support", reply_markup=keyboard_main_buttons)
 
 
 
@@ -711,7 +709,7 @@ async def invest_from_main_balance(message: Message):
         wait_buttons['wait_money_from_mainbalance_to_invest'] = True
 
     elif user_money < 1000:
-        await message.answer('')
+        await message.answer('🔴 Баланс составляет менее 1000₽')
 
 
 @dp.message(lambda x: x.text and wait_buttons['wait_money_from_mainbalance_to_invest'] == True and x.text.isdigit())
@@ -787,7 +785,7 @@ async def invest_from_ref_balance(message: Message):
         wait_buttons['wait_money_from_refbalance_to_invest'] = True
 
     elif ref_money < 1000:
-        await message.answer('')
+        await message.answer('🔴 Баланс составляет менее 1000₽')
 
 
 
@@ -871,20 +869,20 @@ async def process_ask_sum_to_add(message: Message):
     sum = int(sum)
     user_id = message.from_user.id
 
-    cur.execute("SELECT deposit FROM referrals WHERE user_id=?", (user_id,))
-    deposit = cur.fetchone()
+    cur.execute("SELECT accumulated FROM referrals WHERE user_id=?", (user_id,))
+    accumulated = cur.fetchone()
 
-    deposit = str(deposit)
-    for i in deposit:
+    accumulated = str(accumulated)
+    for i in accumulated:
         if i == '(' or i == ')' or i == ',' or i == "'" or i == "[" or i == "]":
-            deposit = deposit.replace(i, '')
+            accumulated = accumulated.replace(i, '')
 
-    deposit = int(deposit)
+    accumulated = int(accumulated)
 
-    if sum <= deposit:
-        deposit -= sum
+    if sum <= accumulated and sum >= 300:
+        accumulated -= sum
 
-        cur.execute(f'UPDATE referrals SET deposit=? WHERE user_id=?', (deposit, user_id))
+        cur.execute(f'UPDATE referrals SET accumulated=? WHERE user_id=?', (accumulated, user_id))
         bd.commit()
 
 
@@ -910,8 +908,12 @@ async def process_ask_sum_to_add(message: Message):
 
 
 
-    elif sum > deposit:
+    elif sum > accumulated:
         await message.answer('🔴 Введенная сумма превышает количество денеждных средств на вашем депозитном счете!')
+
+
+    elif sum < 300:
+        await message.answer('🔴 Минимальное количество средств на вывод с накопительного счета 300₽')
 
 
 
@@ -966,10 +968,17 @@ async def button_show_connected_users(message: Message):
     referal_link = info_about_referals['referal_link']
     invited_by = info_about_referals['invited_by']
 
+    cur.execute("SELECT user_name FROM referrals WHERE ref_link=?", (invited_by,))
+    name_from_invited_guy = cur.fetchone()
+    name_from_invited_guy = str(name_from_invited_guy)
+
+    for i in name_from_invited_guy:
+        if i == '(' or i == ')' or i == ',' or i == "'" or i == "[" or i == "]":
+            name_from_invited_guy = name_from_invited_guy.replace(i, '')
 
 
     photo_url = "https://i.ibb.co/87MbWdn/gues.jpg"
-    await bot.send_photo(user_id, photo=photo_url, caption= f'▫️В этом разделе вы можете проверять свои реферальные деньги. Приглашайте друзей и получайте по 3₽ за активацию робота\n\n💵 За депозит каждого реферала предусматривается 3 уровня: 10-5-2%\n\n💰 Всего заработано: {cash_from_invite}₽\n👥 Рефералов: {invited} чел\n👤 Вас пригласил: - {invited_by}')
+    await bot.send_photo(user_id, photo=photo_url, caption= f'▫️В этом разделе вы можете проверять свои реферальные деньги. Приглашайте друзей и получайте по 3₽ за активацию робота\n\n💵 За депозит каждого реферала предусматривается 3 уровня: 10-5-2%\n\n💰 Всего заработано: {cash_from_invite}₽\n👥 Рефералов: {invited} чел\n👤 Вас пригласил: - {name_from_invited_guy}')
 
     await message.answer(
         f'🔗 Ваша реферальная ссылка: {referal_link}',
@@ -1196,7 +1205,7 @@ async def process_ask_sum_to_add(message: Message):
                              reply_markup=back, parse_mode='Markdown')
 
     else:
-        await message.answer(f'💵 Способ пополнения: *Киви кошелек*\n\n🥝 Киви кошелек: 89265275416\n💸 Сумма к переводу:*{sum}*₽\n🚀 Вместе со скриншотом в поддержку отправьте ваш ID. Его вы можете узнать перейдя во вкладку "баланс".\n\n💎 *После оплаты отправьте скриншот в поддержку*',
+        await message.answer(f'💵 Способ пополнения: *Киви кошелек*\n\n🥝 Киви кошелек: 89286259171\n💸 Сумма к переводу:*{sum}*₽\n🚀 Вместе со скриншотом в поддержку отправьте ваш ID. Его вы можете узнать перейдя во вкладку "баланс".\n\n💎 *После оплаты отправьте скриншот в поддержку*',
                              reply_markup=accept, parse_mode='Markdown')
 
 
@@ -1552,7 +1561,7 @@ async def button_show_personal_cash(message: Message):
 
     photo_url = "https://i.ibb.co/ZLWycmn/start.jpg"
     await bot.send_photo(user_id, photo=photo_url,
-                         caption='▫️ *Здесь можно узнать как начать зарабатывать с проектом SpreadX*', parse_mode='Markdown', reply_markup=go_to_info)
+                         caption='▫️ *Здесь можно узнать как начать зарабатывать с проектом Arbitrage Income*', parse_mode='Markdown', reply_markup=go_to_info)
 
 
 
@@ -1724,11 +1733,7 @@ async def agree_work_admin(message: Message):
 
 
 
-
-
         add_procent(user_to_add_balance['user_id'], user_to_add_balance['money_to_add'])
-
-
 
 
 
@@ -1739,16 +1744,51 @@ async def agree_work_admin(message: Message):
         await message.answer('Счет успешно пополнен.')
 
 
+        money_to_add = int(money_to_add)
+
 
         for i in range(0, len(listid)):
-            await bot.send_message(listid[i], 'Вам был начислен процент от пополнения вашего партнера.')
+            print('!!!')
+            print(i)
+            print(listid[i])
+            print('-------')
 
 
+            if i == 0:
+                print(f'сумма к пополнению-', {money_to_add})
+                mtd10 = (10 / 100) * money_to_add
+                print(f'процент - ', {mtd10})
+                await bot.send_message(listid[i], f'*За 1 реферальный уровень вам начислено {mtd10}₽* ✅', parse_mode='Markdown')
+                print('------\n\n------')
+
+
+            elif i == 1:
+                print(f'сумма к пополнению-', {money_to_add})
+                mtd5 = (5 / 100) * money_to_add
+                print(f'процент - ', {mtd5})
+                await bot.send_message(listid[i], f'*За 2 реферальный уровень вам начислено {mtd5}₽* ✅', parse_mode='Markdown')
+                print('------\n\n------')
+
+
+            elif i == 2:
+                print(f'сумма к пополнению-', {money_to_add})
+                mtd2 = (2 / 100) * money_to_add
+                print(f'процент - ', {mtd2})
+                await bot.send_message(listid[i], f'*За 3 реферальный уровень вам начислено {mtd2}₽* ✅', parse_mode='Markdown')
+                print('------\n\n------')
+
+
+
+
+        listid.clear()
+
+        print(listid)
 
 
 
     except:
         await message.answer('Произошла ошибка при пополнении!')
+        listid.clear()
 
 
 #
@@ -2192,6 +2232,7 @@ async def inside_procent(message: Message):
                 newAccumulated = (3 / 100) * deposit
                 newAccumulated += accumulated
 
+                newAccumulated = int(newAccumulated)
 
                 cur.execute(f'UPDATE referrals SET accumulated=? WHERE user_id=?', (newAccumulated, a))
                 bd.commit()
@@ -2206,6 +2247,86 @@ async def inside_procent(message: Message):
         await message.answer('Вы не авторизованы как администратор. /admin_log')
 
 
+
+@dp.message(Text(text='Снять денежные средства с депозитного счета'))
+async def work_with_deposit_admpanel(message: Message):
+    user_id = message.from_user.id
+
+    adm_allow = cur.execute(f'SELECT adm_allow FROM referrals WHERE user_id=?', (user_id,)).fetchone()
+    adm_allow = str(adm_allow)
+
+    for i in adm_allow:
+        if i == '(' or i == ')' or i == ',' or i == "'" or i == "[" or i == "]":
+            adm_allow = adm_allow.replace(i, '')
+
+    adm_allow = int(adm_allow)
+
+    if adm_allow == 1:
+        await message.answer('Введите ID аккаунта с которым хотите работать:')
+
+        test['wait_id'] = True
+
+    elif adm_allow == 0:
+        await message.answer('Вы не авторизованы как администратор. /admin_log')
+
+
+
+@dp.message(lambda x: x.text and test['wait_id'] == True and x.text.isdigit())
+async def id_to_work_with_deposit(message: Message):
+    test['wait_id'] = False
+
+    id = message.text
+    id = int(id)
+
+
+    try:
+        sum = cur.execute(f'SELECT deposit FROM referrals WHERE user_id=?', (id,)).fetchone()
+        sum = str(sum)
+
+        for i in sum:
+            if i == '(' or i == ')' or i == ',' or i == "'" or i == "[" or i == "]":
+                sum = sum.replace(i, '')
+
+        sum = int(sum)
+
+        await message.answer(f'Сумма депозита составляет - {sum}')
+        await message.answer('Введите сумму на вывод:')
+
+        test['wait_sum'] = True
+        test['id'] = id
+
+    except:
+        await message.answer('Произошла ошибка. Возможно вы ввели неверный ID пользователя!')
+
+
+@dp.message(lambda x: x.text and test['wait_sum'] == True and x.text.isdigit())
+async def id_to_work_with_deposit(message: Message):
+    test['wait_sum'] = False
+    id = test['id']
+    test['id'] = 0
+
+    sum = message.text
+    sum = int(sum)
+
+    deposit_all = cur.execute(f'SELECT deposit FROM referrals WHERE user_id=?', (id,)).fetchone()
+    deposit_all = str(deposit_all)
+
+    for i in deposit_all:
+        if i == '(' or i == ')' or i == ',' or i == "'" or i == "[" or i == "]":
+            deposit_all = deposit_all.replace(i, '')
+
+    deposit_all = int(deposit_all)
+
+    if sum <= deposit_all:
+        deposit_all -= sum
+
+        cur.execute(f'UPDATE referrals SET deposit=? WHERE user_id=?', (deposit_all, id))
+        bd.commit()
+
+        await message.answer(f'Вы обновили данные депозитного счета пользователя с персональным ID - {id}')
+
+    elif sum > deposit_all:
+        await message.answer('Введенная сумма превышает сумму на депозитном счету!')
 
 
 #
